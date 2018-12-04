@@ -5,8 +5,10 @@ module SpaceStation
       @channels = {}
     end
 
-    def register_to_channel(channel, client)
-      insert(channel.to_sym, client)
+    def register_to_channel(channels, client)
+      channels.each do |channel|
+        insert(channel.to_sym, client)
+      end
     end
 
     def find_channel(channel_name)

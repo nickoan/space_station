@@ -3,6 +3,7 @@ GEM
   specs:
     nio4r (2.3.1)
     redis (4.0.3)
+    websocket (1.2.8)
 
 PLATFORMS
   ruby
@@ -10,6 +11,7 @@ PLATFORMS
 DEPENDENCIES
   nio4r
   redis (~> 4.0, >= 4.0.3)
+  websocket
 
 RUBY VERSION
    ruby 2.5.3p105

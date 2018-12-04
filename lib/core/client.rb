@@ -1,9 +1,10 @@
 require 'set'
+require 'json'
 
 module SpaceStation
   class Client
 
-    attr_accessor :state
+    attr_accessor :state, :message_queue
 
     attr_reader :client_id, :channel_list
 
@@ -12,9 +13,11 @@ module SpaceStation
       @state = state
       @channel_list = Set.new
       @client_id = generate_client_id
-      @parser = Parser.new
+      @parser = WebsocketParser.new(socket)
+
+      @message_queue = Queue.new
       @chunk = []
-      @mutex = Mutex.new
+      @write_chunk = ''
     end
 
     def channel_name=(name)
@@ -26,22 +29,56 @@ module SpaceStation
       @socket.to_io
     end
 
-    def read_nonblock
-      str = @socket.read_nonblock(16 * 1024)
-      if @parser.end?(str)
-        if !@chunk.empty?
-          str = @chunk.join << str
-          @chunk = []
+    def handshake
+      begin
+        str = @socket.read_nonblock(16 * 1024)
+        handshake_msg = @parser.handshake_request(str) do |headers|
+          topics = headers['topics']
+          if topics
+            Set.merge(topics.split(','))
+          end
         end
-        return @parser.serialize(str)
+
+        if handshake_msg
+          @write_chunk = handshake_msg
+          @state = :active
+        end
+      rescue IO::WaitReadable
       end
-      @chunk << str
-      nil
     end
 
-    def write_nonblock(str)
-      @mutex.synchronize do
-        @socket.write_nonblock(str)
+    def message=(msg)
+      @message_queue << @parser.transfer_message(msg)
+    end
+
+    def read_nonblock
+
+      begin
+        str = @socket.read_nonblock(16 * 1024)
+        @parser.push_to_parse(str)
+        temp = []
+
+        while value = @parser.next
+          break if value.nil?
+          temp << JSON.parse(value, symbolize_names: true)
+        end
+      rescue IO::WaitReadable
+        #stub nothing to do now
+      end
+    end
+
+    # do not using in multi threads
+    def write_response
+      return if @message_queue.empty? && @write_chunk.empty?
+
+      # may have remain from last write
+      @write_chunk = @parser.out_transfer_message(@message_queue.pop(true)) if @write_chunk.empty?
+
+      begin
+        remain_index = @socket.write_nonblock(@write_chunk)
+        @write_chunk = @write_chunk[remain_index..-1]
+      rescue IO::WaitWritable
+        # stub nothing to do
       end
     end
 

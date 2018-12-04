@@ -42,25 +42,10 @@ module SpaceStation
     private
 
     def broadcast
-      temp_client_list = Set.new
-
       @clients_list.each do |c|
-        next if c.closed? || c.client_id == @client.client_id
-        begin
-          c.write_nonblock(@body.to_json)
-        rescue IO::WaitWritable
-          temp_client_list << c
-        rescue EOFError
-        end
+        c.message_queue << @body
       end
-
-      if temp_client_list.size > 0 && @remain_count <= SpaceStation::Task::DEFAULT_REMAIN_TIMES
-        @task_state = :remain
-        @clients_list = temp_client_list
-        @remain_count += 1
-      else
-        @task_state = :complete
-      end
+      @task_state = :complete
     end
 
   end
