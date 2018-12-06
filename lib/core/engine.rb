@@ -78,11 +78,11 @@ module SpaceStation
                 disconnect_from_client(client)
               end
             else
-              next unless read_from_client(client)
-            end
 
-            if m.writable? && client.state == :active
-              client.write_response
+              if m.writable?
+                client.write_response
+              end
+              read_from_client(client)
             end
 
           end

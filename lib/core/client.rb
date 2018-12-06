@@ -35,7 +35,9 @@ module SpaceStation
         handshake_msg = @parser.handshake_request(str) do |headers|
           topics = headers['topics']
           if topics
-            Set.merge(topics.split(','))
+            @channel_list.merge(topics.split(','))
+          else
+            @channel_list.merge('default')
           end
         end
 
@@ -58,7 +60,7 @@ module SpaceStation
         @parser.push_to_parse(str)
         temp = []
 
-        while value = @parser.next
+        while value = @parser.read
           break if value.nil?
           temp << JSON.parse(value, symbolize_names: true)
         end

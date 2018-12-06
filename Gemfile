@@ -7,3 +7,5 @@ gem 'nio4r'
 gem 'redis', '~> 4.0', '>= 4.0.3'
 
 gem 'websocket'
+
+gem 'faye-websocket'
