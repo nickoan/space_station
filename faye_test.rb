@@ -1,6 +1,6 @@
 require 'faye/websocket'
 require 'eventmachine'
-
+require 'json'
 
 EM.run {
 
@@ -8,7 +8,7 @@ EM.run {
   
   ws.on :open do |event|
     p [:open]
-    ws.send()
+    ws.send({channel: "default", data: {}}.to_json)
   end
 
   ws.on :message do |event|

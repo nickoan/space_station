@@ -25,7 +25,7 @@ module SpaceStation
           task.call
 
           unless task.complete?
-            @queue.shift(task)
+            @queue.push(task)
           end
         end # while end
       end # thread end

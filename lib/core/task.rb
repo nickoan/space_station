@@ -42,9 +42,7 @@ module SpaceStation
     private
 
     def broadcast
-      @clients_list.each do |c|
-        c.message_queue << @body
-      end
+      @client.message_queue << @body
       @task_state = :complete
     end
 

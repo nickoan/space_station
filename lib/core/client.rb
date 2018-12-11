@@ -14,7 +14,7 @@ module SpaceStation
       @channel_list = Set.new
       @client_id = generate_client_id
       @parser = WebsocketParser.new(socket)
-
+      @channel_manager = nil
       @message_queue = Queue.new
       @chunk = []
       @write_chunk = ''
@@ -29,15 +29,20 @@ module SpaceStation
       @socket.to_io
     end
 
+    def channel_manager=(cm)
+      @channel_manager ||= cm
+      @channel_manager.register_to_channel(@channel_list, self)
+    end
+
     def handshake
       begin
         str = @socket.read_nonblock(16 * 1024)
         handshake_msg = @parser.handshake_request(str) do |headers|
           topics = headers['topics']
           if topics
-            @channel_list.merge(topics.split(','))
+            @channel_list.merge(topics.split(',').map(&:to_sym))
           else
-            @channel_list.merge('default')
+            @channel_list.merge(['default'].map(&:to_sym))
           end
         end
 
@@ -64,6 +69,7 @@ module SpaceStation
           break if value.nil?
           temp << JSON.parse(value, symbolize_names: true)
         end
+        temp
       rescue IO::WaitReadable
         #stub nothing to do now
       end

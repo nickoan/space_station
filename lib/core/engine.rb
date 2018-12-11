@@ -72,7 +72,10 @@ module SpaceStation
             if client.state != :active
               begin
                 client.handshake
-                m.add_interest(:w) if client.state == :active
+                if client.state == :active
+                  m.add_interest(:w)
+                  client.channel_manager = @channels_manager
+                end
               rescue EOFError
                 client.close
                 disconnect_from_client(client)
