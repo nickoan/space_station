@@ -102,7 +102,7 @@ module SpaceStation
         return if bodies.nil? || bodies.empty?
 
         bodies.each do |body|
-          operate_with_client(client, body, body[:channel])
+          operate_with_client(client, body)
         end
         true
       rescue EOFError
@@ -123,10 +123,9 @@ module SpaceStation
       puts "client id: #{client.client_id} disconnected"
     end
 
-    def operate_with_client(client, body, channel)
-      task = Task.new(channel, body, client)
-      task.prepare(@channels_manager.find_channel(body[:channel]), :broadcast)
-      @tasks_queue.push(task)
+    def operate_with_client(client, body)
+      async_task = SeqSelector.select(client, body, @channels_manager).call
+      @tasks_queue.push(async_task) if async_task
     end
 
   end

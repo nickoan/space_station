@@ -1,5 +1,13 @@
 require 'nio'
 require 'redis'
+
+require './seq/async_sequence'
+require './seq/sequence'
+require './seq/publish'
+require './seq/subscribe'
+require './seq/unsubscribe'
+require './seq/seq_selector'
+
 require './errors'
 require './core/auth'
 require './core/channel_manager'

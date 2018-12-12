@@ -23,10 +23,6 @@ module SpaceStation
         while true
           task = @queue.pop
           task.call
-
-          unless task.complete?
-            @queue.push(task)
-          end
         end # while end
       end # thread end
     end

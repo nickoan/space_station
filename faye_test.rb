@@ -8,7 +8,11 @@ EM.run {
   
   ws.on :open do |event|
     p [:open]
-    ws.send({channel: "default", data: {}}.to_json)
+    ws.send({channel: ["abcd"], seq: :subscribe, data: {}}.to_json)
+    ws.send({channel: ["abcd"], seq: :publish, data: {}}.to_json)
+    sleep(1)
+    ws.send({channel: ["abcd"], seq: :unsubscribe, data: {}}.to_json)
+    ws.send({channel: ["abcd"], seq: :publish, data: {}}.to_json)
   end
 
   ws.on :message do |event|
