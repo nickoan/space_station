@@ -11,7 +11,9 @@ EM.run {
     ws.send({channel: ["abcd"], seq: :subscribe, data: {}}.to_json)
     sleep(3)
     #ws.send({channel: ["abcd"], seq: :unsubscribe, data: {}}.to_json)
-    ws.send({channel: ["abcd"], seq: :publish, data: {}}.to_json)
+    str = ''
+    #5000.times do str << Time.now.to_s end
+    ws.send({channel: ["abcd"], seq: :publish, data: {str: str}}.to_json)
   end
 
   ws.on :message do |event|
