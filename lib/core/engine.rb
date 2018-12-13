@@ -21,13 +21,6 @@ module SpaceStation
       @selector.register(@server, :r)
 
       @tasks_queue = Queue.new
-
-      @auth_checker = Auth.new(Redis.new(
-          host: @options[:redis_host],
-          port: @options[:redis_port],
-          password: @options[:redis_password]
-      ))
-
       @thread_pool = ThreadPool.new(@tasks_queue)
     end
 
