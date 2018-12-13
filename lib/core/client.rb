@@ -41,8 +41,6 @@ module SpaceStation
           topics = headers['topics']
           if topics
             @channel_list.merge(topics.split(',').map(&:to_sym))
-          else
-            @channel_list.merge(['default'].map(&:to_sym))
           end
         end
 
