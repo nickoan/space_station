@@ -4,13 +4,15 @@ module SpaceStation
     prepend AsyncSequence
 
     def call
+
+      channels = @body[:channel]
+
+      pack = channels.map { |channel| @channel_manger.find_channel(channel) }
+
       Proc.new do
-        channels = @body[:channel]
-
-        channels.each do |channel|
-          clients = @channel_manger.find_channel(channel)
-
+        pack.each do |clients|
           clients.each do |c|
+            next if c.client_id == @client.client_id
             c.message_queue << @body
           end
         end

@@ -59,8 +59,7 @@ module SpaceStation
             client = Client.new(sock)
             @client_pool << client
             @selector.register(client, :r)
-            puts "client id: #{client.client_id} trying to connect"
-            #read_from_client(client)
+            log(:connect, client)
           when ::SpaceStation::Client
             client = m.io
 
@@ -75,6 +74,7 @@ module SpaceStation
                 if client.state == :active
                   m.add_interest(:w)
                   client.channel_manager = @channels_manager
+                  log(:pass_handshake, client)
                 end
               rescue EOFError
                 client.close
@@ -118,14 +118,17 @@ module SpaceStation
     def disconnect_from_client(client)
       @selector.deregister(client)
       @channels_manager.deregister(client.channel_list, client)
-      puts @client_pool.size
       @client_pool.delete(client)
-      puts "client id: #{client.client_id} disconnected"
+      log(:disconnect, client)
     end
 
     def operate_with_client(client, body)
       async_task = SeqSelector.select(client, body, @channels_manager).call
       @tasks_queue.push(async_task) if async_task
+    end
+
+    def log(action, client)
+      puts "[#{action}] #{client.client_id}: #{Time.now}"
     end
 
   end
