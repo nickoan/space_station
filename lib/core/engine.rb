@@ -4,9 +4,9 @@ require 'nio'
 module SpaceStation
   class Engine
 
-    def initialize(options)
-
-      @options = options.dup
+    def initialize
+      @config = Config.new
+      @options = @config.options
 
       @selector = NIO::Selector.new
       @channels_manager = ChannelManager.new

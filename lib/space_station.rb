@@ -8,6 +8,7 @@ require './seq/subscribe'
 require './seq/unsubscribe'
 require './seq/seq_selector'
 
+require './core/config'
 require './errors'
 require './core/channel_manager'
 require './core/thread_pool'
@@ -18,11 +19,10 @@ require './core/engine'
 
 # {
 #     account: '123',
-#     channel: 'test',
+#     channel: ['test'],
 #     data: {
 #         message: 123
 #     }
 # }
 
-::SpaceStation::Engine.new(redis_host: 'localhost').run!
-
+::SpaceStation::Engine.new.run!

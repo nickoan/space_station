@@ -5,4 +5,10 @@ module SpaceStation
 
   class NotPassAuthError < StandardError
   end
+
+  class UnknownConfigType < Exception
+  end
+
+  class ConfigOperationError < Exception
+  end
 end
