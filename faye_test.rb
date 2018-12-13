@@ -8,18 +8,18 @@ EM.run {
   
   ws.on :open do |event|
     p [:open]
-    ws.send({channel: ["abcd"], seq: :subscribe, data: {}}.to_json)
-    sleep(1)
+    ws.send({channels: ["abcd"], seq: :subscribe, data: {}}.to_json)
+    sleep(3)
     #ws.send({channel: ["abcd"], seq: :unsubscribe, data: {}}.to_json)
     str = ''
     #5000.times do str << Time.now.to_s end
-    ws.send({channel: ["abcd"], seq: :publish, data: {str: str}}.to_json)
+    ws.send({channels: ["abcd"], seq: :publish, data: {str: str}}.to_json)
   end
 
   ws.on :message do |event|
     p [:message, event.data]
-    ws.send({channel: ["abcd"], seq: :publish, data: {}}.to_json)
-    sleep(0.3)
+    ws.send({channels: ["abcd"], seq: :publish, data: {}}.to_json)
+    sleep(2)
   end
 
   ws.on :close do |event|

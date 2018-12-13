@@ -22,6 +22,8 @@ module SpaceStation
 
       @tasks_queue = Queue.new
       @thread_pool = ThreadPool.new(@tasks_queue)
+
+      @auth_loader = Auth::Loader.new(@options) if @config.enable?(:auth)
     end
 
     def config_file=(path)
@@ -70,13 +72,25 @@ module SpaceStation
               next
             end
 
+            if client.state == :fail
+              client.write_response
+              client.close
+              disconnect_from_client(client)
+            end
+
             if client.state != :active
               begin
-                client.handshake
+                client.handshake(@auth_loader)
                 if client.state == :active
                   m.add_interest(:w)
                   client.channel_manager = @channels_manager
                   log(:pass_handshake, client)
+
+                elsif client.state == :fail
+                  client.write_response
+                  log(:fail_handshake, client)
+                  client.close
+                  disconnect_from_client(client)
                 end
               rescue EOFError
                 client.close
