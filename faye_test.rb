@@ -4,7 +4,7 @@ require 'json'
 
 EM.run {
 
-  ws = Faye::WebSocket::Client.new('ws://127.0.0.1:1234')
+  ws = Faye::WebSocket::Client.new('ws://127.0.0.1:8999')
   
   ws.on :open do |event|
     p [:open]

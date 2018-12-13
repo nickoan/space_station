@@ -121,7 +121,7 @@ module SpaceStation
     end
 
     def log(action, client)
-      puts "[#{action}] #{client.client_id}: #{Time.now}"
+      puts "[\033[1;32m#{action}\033[0m] #{client.client_id}: #{Time.now}"
     end
 
   end

@@ -17,7 +17,7 @@ module SpaceStation
     private
 
     def log(type)
-      puts "[#{type}] #{@client.client_id}: #{@body.to_json}"
+      puts "[\033[1;32m#{type}\033[0m] #{@client.client_id}: #{@body.to_json}"
     end
   end
 end
