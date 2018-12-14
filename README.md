@@ -15,8 +15,18 @@ a socket broker
 ### Configure File
 
 ```
-file_path 'configure.rb'
-
 set :redis_host, 'localhost'
 set :port, 8999
 ```
+
+### Run
+```
+require 'space_station'
+
+engine = ::SpaceStation::Engine.new
+
+engine.config_file = "/User/xxx.rb"
+
+engine.run!
+```
+###

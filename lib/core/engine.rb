@@ -24,6 +24,14 @@ module SpaceStation
       @thread_pool = ThreadPool.new(@tasks_queue)
     end
 
+    def config_file=(path)
+      @config.file_path(path)
+    end
+
+    def config_file_type=(type)
+      @config.file_type(type)
+    end
+
     def run!
 
       puts "service start... Listen At: #{@host}:#{@port}"
