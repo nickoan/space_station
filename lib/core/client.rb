@@ -8,6 +8,8 @@ module SpaceStation
 
     attr_reader :client_id, :channel_list
 
+    attr_writer :monitor
+
     def initialize(socket, state = :unknown)
       @socket = socket
       @state = state
@@ -15,14 +17,30 @@ module SpaceStation
       @client_id = generate_client_id
       @parser = WebsocketParser.new(socket)
       @channel_manager = nil
-      @message_queue = Queue.new
-      @chunk = []
+      @message_queue = []
       @write_chunk = ''
+      @client_own_mutex = Mutex.new
+      @monitor = nil
     end
 
     def channel_name=(name)
       raise StateIsUnKnown if @state == :unknown
       @channel_list << name
+    end
+
+    def response_message=(msg)
+      @client_own_mutex.synchronize do
+        @message_queue.push(msg)
+        @monitor.add_interest(:w) unless @monitor.writable? || @monitor.closed?
+      end
+    end
+
+    def remove_w_interest_if_needed
+      @client_own_mutex.synchronize do
+        if @monitor.writable? && @message_queue.empty? && @write_chunk.empty?
+          @monitor.remove_interest(:w)
+        end
+      end
     end
 
     def to_io
@@ -40,7 +58,7 @@ module SpaceStation
         handshake_msg = @parser.handshake_request(str) do |headers|
           topics = headers['topics']
           if topics
-            @channel_list.merge(topics.split(',').map(&:to_sym))
+            @channel_list.merge(topics.split(',').map { |v| v.strip.to_sym })
           end
         end
 
@@ -70,6 +88,7 @@ module SpaceStation
         temp
       rescue IO::WaitReadable
         #stub nothing to do now
+      rescue Errno::ECONNRESET
       end
     end
 
@@ -78,7 +97,7 @@ module SpaceStation
       return if @message_queue.empty? && @write_chunk.empty?
 
       # may have remain from last write
-      @write_chunk = @parser.out_transfer_message(@message_queue.pop(true)) if @write_chunk.empty?
+      @write_chunk = @parser.out_transfer_message(@message_queue.shift) if @write_chunk.empty?
 
       begin
         remain_index = @socket.write_nonblock(@write_chunk)

@@ -13,7 +13,7 @@ module SpaceStation
         pack.each do |clients|
           clients.each do |c|
             next if c.client_id == @client.client_id
-            c.message_queue << @body
+            c.response_message = @body
           end
         end
         log(:publish)

@@ -59,7 +59,8 @@ module SpaceStation
 
             client = Client.new(sock)
             @client_pool << client
-            @selector.register(client, :r)
+            monitor = @selector.register(client, :r)
+            client.monitor = monitor
             log(:connect, client)
           when ::SpaceStation::Client
             client = m.io
@@ -85,6 +86,7 @@ module SpaceStation
 
               if m.writable?
                 client.write_response
+                client.remove_w_interest_if_needed
               end
               read_from_client(client)
             end
