@@ -5,7 +5,8 @@ module SpaceStation
 
     def call
 
-      channels = @body[:channel]
+      channels = @body[:channels]
+      return if channels.nil?
 
       pack = channels.map { |channel| @channel_manger.find_channel(channel) }
 

@@ -4,22 +4,18 @@ module SpaceStation
 
       attr_reader :name
 
+      attr_writer :permissions
+
       def initialize(name)
         @name = name
         @state = :unauth
-        @permissions = Set.new
       end
-
-      def permissions=(*args)
-        @permissions.merge(args)
-      end
-
 
       def check_seq(body)
         seq = body[:seq]
         case seq
         when 'publish', 'subscribe'
-          raise PermissionDeniedError unless @permissions[:seq].include?(seq.to_s)
+          raise PermissionDeniedError, "#{seq} not allowed" unless @permissions[:seq].include?(seq.to_s)
           check_channels(body[:channels])
         else
           raise UnknownSequenceTypeError, "known sequence #{seq}"

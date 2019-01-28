@@ -11,10 +11,10 @@ module SpaceStation
 
       # permissions
       # account name as redis key
-      # {
-      #     seq: ['publish', 'subscribe'],
-      #     channels: ['abcd']
-      # }
+      {
+          seq: ['publish', 'subscribe'],
+          channels: ['abcd']
+      }
 
       def checkout(account_name)
         permission = @redis.get(account_name)
