@@ -30,7 +30,9 @@ module SpaceStation
 
     def self.select(client, body, channel_manger)
       seq = body[:seq]
+      client.account.check_seq(body)
       klass = SeqSelector.choose(seq)
+      raise UnknownSequenceTypeError, "unknown seq: #{seq}" if klass.nil?
       klass.new(client, body, channel_manger)
     end
   end

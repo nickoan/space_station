@@ -22,6 +22,8 @@ module SpaceStation
 
       @tasks_queue = Queue.new
       @thread_pool = ThreadPool.new(@tasks_queue)
+
+      @auth_loader = Auth::Loader.new(@options) if @config.enable?(:auth)
     end
 
     def config_file=(path)
@@ -70,13 +72,25 @@ module SpaceStation
               next
             end
 
+            if client.state == :fail
+              client.write_response
+              client.close
+              disconnect_from_client(client)
+            end
+
             if client.state != :active
               begin
-                client.handshake
+                client.handshake(@auth_loader)
                 if client.state == :active
                   m.add_interest(:w)
                   client.channel_manager = @channels_manager
                   log(:pass_handshake, client)
+
+                elsif client.state == :fail
+                  client.write_response
+                  log(:fail_handshake, client)
+                  client.close
+                  disconnect_from_client(client)
                 end
               rescue EOFError
                 client.close
@@ -126,8 +140,12 @@ module SpaceStation
     end
 
     def operate_with_client(client, body)
-      async_task = SeqSelector.select(client, body, @channels_manager).call
-      @tasks_queue.push(async_task) if async_task
+      begin
+        async_task = SeqSelector.select(client, body, @channels_manager).call
+        @tasks_queue.push(async_task) if async_task
+      rescue PermissionDeniedError => ex
+        client.response_message =  {error: true, message: ex.message}.to_json
+      end
     end
 
     def log(action, client)

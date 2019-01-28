@@ -4,11 +4,24 @@ module SpaceStation
     def initialize
       @config_type = :ruby
       @path = 'configure'
+      load_config_file
     end
 
     def set(name, value)
       raise ConfigOperationError, 'should use set method in .rb files' unless @config_type == :ruby
       @config_data[name] = value
+    end
+
+    def enable?(name)
+      @config_data[name]
+    end
+
+    def enable(name)
+      @config_data[name] = true
+    end
+
+    def disable(name)
+      @config_data.delete(name)
     end
 
     def file_type(option)
@@ -20,7 +33,6 @@ module SpaceStation
     end
 
     def options
-      load_config_file
       @config_data.dup
     end
 

@@ -6,7 +6,7 @@ module SpaceStation
 
     attr_accessor :state, :message_queue
 
-    attr_reader :client_id, :channel_list
+    attr_reader :client_id, :channel_list, :account
 
     attr_writer :monitor
 
@@ -52,19 +52,26 @@ module SpaceStation
       @channel_manager.register_to_channel(@channel_list, self)
     end
 
-    def handshake
+    def handshake(auth_loader = nil)
       begin
         str = @socket.read_nonblock(16 * 1024)
         handshake_msg = @parser.handshake_request(str) do |headers|
-          topics = headers['topics']
+          topics = headers['channels']
           if topics
             @channel_list.merge(topics.split(',').map { |v| v.strip.to_sym })
           end
+          @account_name = headers['account']
         end
 
         if handshake_msg
-          @write_chunk = handshake_msg
-          @state = :active
+          @account = auth_loader.checkout(@account_name)
+          if @account.nil?
+            @write_chunk = "HTTP/1.1 401 Auth Fail\r\n\r\n"
+            @state = :fail
+          else
+            @write_chunk = handshake_msg
+            @state = :active
+          end
         end
       rescue IO::WaitReadable
       end

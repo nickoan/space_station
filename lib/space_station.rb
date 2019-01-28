@@ -1,6 +1,9 @@
 require 'nio'
 require 'redis'
 
+require './auth/account'
+require './auth/loader'
+
 require './seq/async_sequence'
 require './seq/sequence'
 require './seq/publish'
