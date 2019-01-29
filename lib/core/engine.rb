@@ -34,6 +34,18 @@ module SpaceStation
       @config.file_type(type)
     end
 
+    def start!
+      begin
+        run!
+      rescue Interrupt
+        puts 'space station ending now..........'
+      rescue => ex
+        log(:error_occur, ex.full_message)
+      end
+    end
+
+    private
+
     def run!
 
       puts "service start... Listen At: #{@host}:#{@port}"
@@ -55,8 +67,6 @@ module SpaceStation
               sock = m.io.accept_nonblock
               next if sock.nil?
             rescue IO::WaitReadable
-            rescue => ex
-              puts ex.full_message
             end
 
             client = Client.new(sock)
@@ -64,6 +74,7 @@ module SpaceStation
             monitor = @selector.register(client, :r)
             client.monitor = monitor
             log(:connect, client)
+
           when ::SpaceStation::Client
             client = m.io
 
