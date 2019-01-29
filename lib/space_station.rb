@@ -28,4 +28,4 @@ require './core/engine'
 #     }
 # }
 
-::SpaceStation::Engine.new.run!
+::SpaceStation::Engine.new.start!
