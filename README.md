@@ -17,6 +17,25 @@ a socket broker
 ```
 set :redis_host, 'localhost'
 set :port, 8999
+
+enable :auth 
+
+set :redis_port, 6379
+```
+
+### Auth Rule
+
+```
+request headers:
+account: abcd
+
+
+#in redis set
+
+key: abcd (account name)
+
+value: {"seq":["subscribe"],"channels":["abcd"]} (format as json)
+
 ```
 
 ### Run
@@ -27,6 +46,6 @@ engine = ::SpaceStation::Engine.new
 
 engine.config_file = "/User/xxx.rb"
 
-engine.run!
+engine.start!
 ```
 ###
