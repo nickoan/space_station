@@ -152,7 +152,7 @@ module SpaceStation
 
     def operate_with_client(client, body)
       begin
-        async_task = SeqSelector.select(client, body, @channels_manager).call
+        async_task = SeqSelector.select(client, body, @channels_manager, @config).call
         @tasks_queue.push(async_task) if async_task
       rescue PermissionDeniedError => ex
         client.response_message =  {error: true, message: ex.message}.to_json

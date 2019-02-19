@@ -28,7 +28,7 @@ module SpaceStation
     set_seq :subscribe, Subscribe
     set_seq :unsubscribe, Unsubscribe
 
-    def self.select(client, body, channel_manger)
+    def self.select(client, body, channel_manger, config = {})
       seq = body[:seq]
       client.account.check_seq(body)
       klass = SeqSelector.choose(seq)

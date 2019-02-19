@@ -64,7 +64,7 @@ module SpaceStation
         end
 
         if handshake_msg
-          @account = auth_loader.checkout(@account_name)
+          @account = auth_loader.checkout(@account_name) if auth_loader
           if @account.nil?
             @write_chunk = "HTTP/1.1 401 Auth Fail\r\n\r\n"
             @state = :fail
